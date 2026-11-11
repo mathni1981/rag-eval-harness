@@ -10,8 +10,8 @@ Next: Week 3 evaluation in `harness/evaluate.py` (recall@k, LLM judge, abstentio
 
 ## Hard rules
 
-1. **Eval questions need Mahesh's sign-off.** The first 50 questions were drafted by Claude
-   (`"author": "claude"`) and are reviewed by Mahesh using `eval_set/REVIEW.md`. Never change
+1. **Eval questions sign-off.** The first 50 questions were drafted by Claude
+   (`"author": "claude"`) and then reviewed by Mahesh using `eval_set/REVIEW.md`. Never change
    question content, gold answers or evidence without being asked, and never relabel a
    question's `author`. New human-written questions use `"author": "human"`.
 2. **Never commit data or secrets.** `data/raw/`, `data/text/` and `.env` stay out of git.
