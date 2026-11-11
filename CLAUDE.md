@@ -5,7 +5,8 @@ retrieval recall, faithfulness, correctness, citation accuracy and abstention.
 Owner: Mahesh Nidhruva. Code is built with Claude Code and reviewed by Mahesh.
 
 Week 1 design (built and tested): @docs/week1-spec.md
-Next: Week 2 baseline pipeline in `harness/` (chunking, embeddings, retrieval, answers with Claude).
+Week 2 (built and tested): `harness/` runs the baseline pipeline; see README "Running the pipeline".
+Next: Week 3 evaluation in `harness/evaluate.py` (recall@k, LLM judge, abstention, judge agreement).
 
 ## Hard rules
 
@@ -59,9 +60,17 @@ eval_set/
   questions.jsonl         eval set (first 50 drafted by Claude, reviewed by Mahesh)
   REVIEW.md               review checklist for the drafted questions
   SCHEMA.md               field definitions
-harness/                  Week 2+
-experiments/              Week 4
-results/                  Week 4
+harness/
+  config.py               run configs (experiments/configs/*.yaml)
+  chunking.py             fixed and section-aware chunks with exact offsets
+  companies.py            readable company names for headers and prompts
+  index.py                chunk index + embeddings cache in data/index/ (ignored)
+  retrieve.py             dense and BM25 retrievers; gold-span overlap check
+  prompts.py              prompt variants: plain, cited, cited_abstain
+  generate.py             Claude call, citation parsing
+  run.py                  end-to-end run → results/runs/<name>/ (committed)
+experiments/configs/      one YAML per run (baseline.yaml)
+results/runs/             answers.jsonl + run.json per run (committed)
 tests/
 ```
 

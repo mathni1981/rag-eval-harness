@@ -4,7 +4,7 @@
 evaluation harness for question answering over public SEC 10-K filings, and uses it to
 measure which design choices actually matter.
 
-> Status: in progress. Week 1 done: corpus frozen, first 50 questions drafted and in review.
+> Status: in progress. Week 1 done (corpus, 50 reviewed questions). Week 2 done (baseline pipeline).
 
 ## Why this project
 
@@ -60,6 +60,28 @@ Each changes one thing against a fixed baseline:
 4. Prompting: plain answer vs. required citations vs. explicit permission to abstain
 5. Judge reliability: where the LLM judge disagrees with hand labels
 
+## Baseline pipeline
+
+| Stage | Baseline choice |
+|---|---|
+| Chunking | Fixed-size, 1,500 characters with 200 overlap, snapped to paragraph/sentence breaks; every chunk keeps exact offsets into the frozen text |
+| Chunk header | Company name, fiscal year and Item prepended for retrieval only, because filings say "we" rather than the company's name |
+| Embeddings | `BAAI/bge-small-en-v1.5`, run locally |
+| Retrieval | Cosine similarity, top 5 |
+| Generation | Claude, answering only from the numbered excerpts and citing them as [n] |
+
+## Running the pipeline
+
+```bash
+python -m harness.index --config experiments/configs/baseline.yaml              # build index
+python -m harness.run --config experiments/configs/baseline.yaml --retrieval-only  # no API cost
+python -m harness.run --config experiments/configs/baseline.yaml --limit 3        # smoke test
+python -m harness.run --config experiments/configs/baseline.yaml                  # all questions
+```
+
+Each run writes `results/runs/<name>/answers.jsonl` (retrieved chunks, answer, citations,
+tokens) and `run.json` (config, corpus hashes, git commit, summary). Re-running resumes.
+
 ## Results
 
 To come: results tables, judge agreement, and failure examples.
@@ -76,10 +98,11 @@ questions were drafted by Claude and reviewed by me. Code built with
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env                 # set SEC_USER_AGENT
+cp .env.example .env                 # set SEC_USER_AGENT and ANTHROPIC_API_KEY
 python -m data.download_filings
 python -m data.freeze_text
 python -m tools.validate_eval_set
+python -m harness.run --config experiments/configs/baseline.yaml
 pytest -q
 ```
 
