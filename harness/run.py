@@ -15,9 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
-import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -189,8 +187,6 @@ def main(argv: list[str] | None = None) -> None:
 
     load_dotenv(ROOT / ".env")
     cfg = load_config(args.config)
-    if not args.retrieval_only and not os.environ.get("ANTHROPIC_API_KEY"):
-        sys.exit("Set ANTHROPIC_API_KEY in .env (or use --retrieval-only).")
 
     questions = load_questions()
     if args.ids:

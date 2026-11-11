@@ -35,9 +35,16 @@ def looks_like_abstention(text: str) -> bool:
 
 
 def make_client():
+    """Anthropic client. Uses an API key if one is found (environment or macOS Keychain);
+    otherwise lets the SDK use your `ant auth login` profile, with no key at all."""
     import anthropic
 
-    return anthropic.Anthropic(max_retries=4)  # reads ANTHROPIC_API_KEY from the environment
+    from harness.secrets import anthropic_api_key
+
+    key = anthropic_api_key()
+    if key:
+        return anthropic.Anthropic(api_key=key, max_retries=4)
+    return anthropic.Anthropic(max_retries=4)
 
 
 def generate(

@@ -97,9 +97,10 @@ def load_or_build(
     cfg: RunConfig,
     manifest: dict | None = None,
     embedder: Embedder | None = None,
-    index_dir: Path = INDEX_DIR,
+    index_dir: Path | None = None,
 ) -> Index:
     manifest = manifest if manifest is not None else load_manifest()
+    index_dir = index_dir if index_dir is not None else INDEX_DIR  # resolved at call time
     path = index_dir / cfg.index_key()
     fingerprint = corpus_fingerprint(manifest)
     dense = cfg.retrieval.method == "dense"
