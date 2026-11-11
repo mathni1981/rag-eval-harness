@@ -287,3 +287,46 @@ def test_make_client_uses_key_if_present_else_profile(monkeypatch):
     monkeypatch.setattr(sec, "anthropic_api_key", lambda: None)
     make_client()
     assert calls[0]["api_key"] == "k" and "api_key" not in calls[1]
+
+
+def test_old_rubric_judgments_are_archived_and_redone(run_dir):
+    run, questions, manifest = run_dir
+    old = VALID | {"key_points_covered": [True], "id": "q001"}  # no rubric_version → v1
+    (run / "judgments.jsonl").write_text(json.dumps(old) + "\n")
+    v1 = VALID | {"key_points_covered": [True]}
+    v2 = VALID | {
+        "correctness": "abstained",
+        "faithfulness": "n/a",
+        "citations": "n/a",
+        "key_points_covered": [True],
+    }
+    client = FakeJudge([json.dumps(v1), json.dumps(v2)])
+    scores = evaluate(run, questions, client, "judge", manifest=manifest)
+    assert client.calls == 2 and (run / "judgments.rubric-v1.jsonl").exists()
+    assert scores["rubric_version"] == "2"
+    assert all(
+        json.loads(x)["rubric_version"] == "2"
+        for x in (run / "judgments.jsonl").read_text().splitlines()
+    )
+
+
+def test_declines_split_by_whether_evidence_was_retrieved():
+    j = {"correctness": "abstained", "faithfulness": "n/a", "citations": "n/a"}
+    rows = [
+        {"q": {"id": "q1", "type": "single_fact"}, "j": j, "retrieved_all": True},
+        {"q": {"id": "q2", "type": "single_fact"}, "j": j, "retrieved_all": False},
+        {
+            "q": {"id": "q3", "type": "single_fact"},
+            "j": j | {"correctness": "correct"},
+            "retrieved_all": True,
+        },
+    ]
+    d = answer_metrics(rows)["answerable_declines"]
+    assert d == {"total": 2, "evidence_was_retrieved": ["q1"], "evidence_not_retrieved": ["q2"]}
+
+
+def test_rubric_states_the_agreed_rules():
+    from harness.rubric import RUBRIC
+
+    assert 'for one side but not the other is "partial"' in RUBRIC
+    assert "including facts mentioned inside a decline" in RUBRIC

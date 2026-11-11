@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 
-from harness.rubric import CITATIONS, CORRECTNESS, FAITHFULNESS, RUBRIC
+from harness.rubric import CITATIONS, CORRECTNESS, FAITHFULNESS, RUBRIC, RUBRIC_VERSION
 
 JUDGE_SYSTEM = (
     "You are a strict, careful grader for a question-answering system over SEC 10-K filings. "
@@ -104,6 +104,7 @@ def judge_answer(
         try:
             out = parse_judgment(text, len(question["key_points"]))
             out["judge_model"] = model
+            out["rubric_version"] = RUBRIC_VERSION
             out["judge_input_tokens"] = resp.usage.input_tokens
             out["judge_output_tokens"] = resp.usage.output_tokens
             return out

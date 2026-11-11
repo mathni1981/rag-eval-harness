@@ -51,65 +51,79 @@
     }
   },
   "judge_model": "claude-opus-5-5",
-  "judged": 3,
+  "rubric_version": "2",
+  "judged": 50,
   "answers": {
     "answerable": {
       "correctness_score": {
-        "value": 0.667,
+        "value": 0.688,
         "ci95": [
-          0.0,
-          1.0
+          0.562,
+          0.812
         ],
-        "n": 3
+        "n": 40
       },
       "fully_correct": {
-        "value": 0.667,
+        "value": 0.6,
         "ci95": [
-          0.0,
-          1.0
+          0.45,
+          0.75
         ],
-        "n": 3
+        "n": 40
       },
       "partial": {
-        "value": 0.0,
+        "value": 0.175,
         "ci95": [
-          0.0,
-          0.0
+          0.075,
+          0.3
         ],
-        "n": 3
+        "n": 40
       },
       "incorrect": {
-        "value": 0.333,
+        "value": 0.05,
         "ci95": [
           0.0,
-          1.0
+          0.125
         ],
-        "n": 3
+        "n": 40
       },
       "false_abstention": {
-        "value": 0.0,
+        "value": 0.175,
         "ci95": [
-          0.0,
-          0.0
+          0.075,
+          0.3
         ],
-        "n": 3
+        "n": 40
       },
       "faithful": {
-        "value": 1.0,
+        "value": 0.975,
         "ci95": [
-          1.0,
+          0.925,
           1.0
         ],
-        "n": 3
+        "n": 40
       },
       "citations_accurate": {
-        "value": 1.0,
+        "value": 0.975,
         "ci95": [
-          1.0,
+          0.925,
           1.0
         ],
-        "n": 3
+        "n": 40
       }
+    },
+    "answerable_declines": {
+      "total": 7,
+      "evidence_was_retrieved": [],
+      "evidence_not_retrieved": [
+        "q011",
+        "q013",
+        "q033",
+        "q037",
+        "q038",
+        "q039",
+        "q040"
+      ]
     },
     "correctness_by_retrieval": {
       "all_evidence_retrieved": {
@@ -118,32 +132,69 @@
           1.0,
           1.0
         ],
-        "n": 2
+        "n": 20
       },
       "evidence_missing": {
+        "value": 0.375,
+        "ci95": [
+          0.225,
+          0.55
+        ],
+        "n": 20
+      }
+    },
+    "unanswerable": {
+      "abstained": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 10
+      },
+      "answered_anyway": {
         "value": 0.0,
-        "ci95": null,
-        "n": 1
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 10
       }
     },
     "correctness_by_type": {
-      "single_fact": {
-        "value": 0.667,
+      "comparison": {
+        "value": 0.25,
         "ci95": [
-          0.0,
+          0.05,
+          0.45
+        ],
+        "n": 10
+      },
+      "multi_passage": {
+        "value": 0.833,
+        "ci95": [
+          0.708,
+          0.958
+        ],
+        "n": 12
+      },
+      "single_fact": {
+        "value": 0.833,
+        "ci95": [
+          0.667,
           1.0
         ],
-        "n": 3
+        "n": 18
       }
     },
     "correctness_by_author": {
       "claude": {
-        "value": 0.667,
+        "value": 0.688,
         "ci95": [
-          0.0,
-          1.0
+          0.562,
+          0.812
         ],
-        "n": 3
+        "n": 40
       }
     }
   }

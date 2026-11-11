@@ -21,7 +21,7 @@ from collections import defaultdict
 
 from data.common import ROOT
 from harness.excerpts import excerpts_for, format_excerpts
-from harness.rubric import CITATIONS, CORRECTNESS, FAITHFULNESS, RUBRIC
+from harness.rubric import CITATIONS, CORRECTNESS, FAITHFULNESS, RUBRIC, RUBRIC_VERSION
 from harness.run import QUESTIONS_PATH, RUNS_DIR, load_questions
 
 LABELS_DIR = ROOT / "eval_set" / "hand_labels"
@@ -48,7 +48,7 @@ def stratified_sample(questions: list[dict], n: int, seed: int = SEED) -> list[d
 
 def packet(run: str, sample: list[dict], answers: dict) -> str:
     out = [
-        f"# Hand-labeling packet: `{run}`",
+        f"# Hand-labeling packet: `{run}` (rubric v{RUBRIC_VERSION})",
         "",
         f"{len(sample)} questions. For each, read the excerpts and the answer, then record three grades",
         f"in `{run}_labels.csv` using the rubric below. Grade what you see; don't look at the judge's",
@@ -100,6 +100,11 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument("--run", required=True)
     parser.add_argument("--n", type=int, default=30)
+    parser.add_argument(
+        "--refresh-packet",
+        action="store_true",
+        help="rewrite the packet (e.g. after a rubric change) for the questions already in your CSV",
+    )
     args = parser.parse_args(argv)
 
     answers_path = RUNS_DIR / args.run / "answers.jsonl"
@@ -111,6 +116,20 @@ def main(argv: list[str] | None = None) -> None:
         answers[rec["id"]] = rec
 
     csv_path = LABELS_DIR / f"{args.run}_labels.csv"
+    if args.refresh_packet:
+        if not csv_path.exists():
+            sys.exit(
+                f"No labels at {csv_path.relative_to(ROOT)}; run without --refresh-packet first."
+            )
+        with csv_path.open(newline="", encoding="utf-8") as f:
+            ids = {row["id"] for row in csv.DictReader(f)}
+        sample = [q for q in load_questions(QUESTIONS_PATH) if q["id"] in ids]
+        out = LABELS_DIR / f"{args.run}_packet.md"
+        out.write_text(packet(args.run, sample, answers), encoding="utf-8")
+        print(
+            f"Rewrote {out.relative_to(ROOT)} for {len(sample)} questions; your labels are untouched."
+        )
+        return
     if csv_path.exists():
         sys.exit(f"{csv_path.relative_to(ROOT)} already exists; not overwriting your labels.")
 

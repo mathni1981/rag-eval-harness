@@ -25,7 +25,7 @@ from dotenv import load_dotenv
 from data.common import ROOT, load_manifest
 from harness.excerpts import excerpts_for, format_excerpts
 from harness.judge import judge_answer
-from harness.rubric import CORRECTNESS_SCORE
+from harness.rubric import CORRECTNESS_SCORE, RUBRIC_VERSION
 from harness.run import QUESTIONS_PATH, RUNS_DIR, load_questions
 
 DEFAULT_JUDGE = "claude-opus-5-5"
@@ -116,6 +116,14 @@ def answer_metrics(rows: list[dict]) -> dict:
                 ]
             ),
         }
+        declined = [r for r in answerable if r["j"]["correctness"] == "abstained"]
+        out["answerable_declines"] = {
+            "total": len(declined),
+            "evidence_was_retrieved": sorted(r["q"]["id"] for r in declined if r["retrieved_all"]),
+            "evidence_not_retrieved": sorted(
+                r["q"]["id"] for r in declined if not r["retrieved_all"]
+            ),
+        }
         hit = [r for r in answerable if r["retrieved_all"]]
         miss = [r for r in answerable if not r["retrieved_all"]]
         out["correctness_by_retrieval"] = {
@@ -168,7 +176,7 @@ def render_report(run_name: str, scores: dict, judged: bool) -> str:
         a = scores["answers"]
         lines += [
             "",
-            f"## Answers (judge: `{scores['judge_model']}`)",
+            f"## Answers (judge: `{scores['judge_model']}`, rubric v{scores.get('rubric_version', '1')})",
             "",
             "| Metric | Value |",
             "|---|---|",
@@ -177,6 +185,20 @@ def render_report(run_name: str, scores: dict, judged: bool) -> str:
             lines.append(f"| Answerable · {key.replace('_', ' ')} | {fmt(m)} |")
         for key, m in a.get("unanswerable", {}).items():
             lines.append(f"| Unanswerable · {key.replace('_', ' ')} | {fmt(m)} |")
+        d = a.get("answerable_declines")
+        if d:
+            lines += [
+                "",
+                "## Declines on answerable questions",
+                "",
+                f"{d['total']} answerable questions were declined. Declining when the gold evidence was not",
+                "retrieved is a retrieval failure; declining when it was retrieved is a generation failure.",
+                "",
+                "| Cause | Count | Questions |",
+                "|---|---|---|",
+                f"| Gold evidence not retrieved | {len(d['evidence_not_retrieved'])} | {', '.join(d['evidence_not_retrieved']) or '–'} |",
+                f"| Gold evidence was retrieved | {len(d['evidence_was_retrieved'])} | {', '.join(d['evidence_was_retrieved']) or '–'} |",
+            ]
         lines += ["", "## Correctness by question type", "", "| Type | Score |", "|---|---|"]
         for t, m in a["correctness_by_type"].items():
             lines.append(f"| {t} | {fmt(m)} |")
@@ -230,9 +252,16 @@ def evaluate(
         jpath = run_dir / "judgments.jsonl"
         judged = {}
         if jpath.exists():
-            for line in jpath.read_text(encoding="utf-8").splitlines():
-                rec = json.loads(line)
-                judged[rec["id"]] = rec
+            existing = [json.loads(x) for x in jpath.read_text(encoding="utf-8").splitlines() if x]
+            old_versions = {r.get("rubric_version", "1") for r in existing} - {RUBRIC_VERSION}
+            if old_versions:
+                archive = run_dir / f"judgments.rubric-v{'-'.join(sorted(old_versions))}.jsonl"
+                jpath.rename(archive)
+                print(
+                    f"Rubric changed to v{RUBRIC_VERSION}; previous judgments kept in {archive.name}"
+                )
+            else:
+                judged = {r["id"]: r for r in existing}
         todo = [q for q in qs if q["id"] not in judged]
         if limit:
             todo = todo[:limit]
@@ -259,6 +288,7 @@ def evaluate(
             )
             rows.append({"q": q, "j": judged[q["id"]], "retrieved_all": bool(all_hit)})
         scores["judge_model"] = judge_model
+        scores["rubric_version"] = RUBRIC_VERSION
         scores["judged"] = len(rows)
         scores["answers"] = answer_metrics(rows)
 
