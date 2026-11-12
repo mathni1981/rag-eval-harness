@@ -330,3 +330,36 @@ def test_rubric_states_the_agreed_rules():
 
     assert 'for one side but not the other is "partial"' in RUBRIC
     assert "including facts mentioned inside a decline" in RUBRIC
+
+
+def test_judge_doubles_budget_when_cut_off():
+    q = {
+        "id": "q1",
+        "type": "single_fact",
+        "question": "?",
+        "gold_answer": "x",
+        "key_points": ["a", "b"],
+    }
+    budgets = []
+
+    class Client:
+        def __init__(self):
+            self.messages = self
+            self.n = 0
+
+        def create(self, **kw):
+            budgets.append(kw["max_tokens"])
+            self.n += 1
+            text, stop = (
+                ('{"correctness": "corr', "max_tokens")
+                if self.n == 1
+                else (json.dumps(VALID), "end_turn")
+            )
+            return SimpleNamespace(
+                content=[SimpleNamespace(type="text", text=text)],
+                stop_reason=stop,
+                usage=SimpleNamespace(input_tokens=1, output_tokens=1),
+            )
+
+    out = judge_answer(Client(), "m", q, "answer", "excerpts")
+    assert out["correctness"] == "correct" and budgets == [2000, 4000]

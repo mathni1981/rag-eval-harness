@@ -1,0 +1,39 @@
+W1111 20:20:49.201000 82662 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+
+=== final (final.yaml) ===
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 10337.07it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 9991.17it/s]
+Loaded index 5d9a62d0ae85: 4,027 chunks
+50 already done, 0 to run -> answers.jsonl
+22 already judged, 28 to judge with claude-opus-5-5
+  [1/28] h023: correct, unfaithful, citations inaccurate
+  [2/28] h024: correct, faithful, citations accurate
+  [3/28] h025: partial, faithful, citations accurate
+  [4/28] h026: partial, faithful, citations inaccurate
+  [5/28] h027: correct, unfaithful, citations accurate
+  [6/28] h028: correct, faithful, citations accurate
+  [7/28] h029: partial, faithful, citations accurate
+  [8/28] h030: partial, faithful, citations accurate
+  [9/28] h031: correct, faithful, citations accurate
+  [10/28] h032: abstained, faithful, citations accurate
+  [11/28] h033: partial, unfaithful, citations accurate
+  [12/28] h034: correct, unfaithful, citations accurate
+  [13/28] h035: correct, faithful, citations accurate
+  [14/28] h036: partial, faithful, citations accurate
+  [15/28] h037: abstained, faithful, citations accurate
+  [16/28] h038: abstained, faithful, citations accurate
+  [17/28] h039: abstained, faithful, citations accurate
+  [18/28] h040: abstained, faithful, citations accurate
+  [19/28] h041: abstained, faithful, citations accurate
+  [20/28] h042: abstained, faithful, citations accurate
+  [21/28] h043: abstained, faithful, citations accurate
+  [22/28] h044: abstained, faithful, citations accurate
+  [23/28] h045: abstained, unfaithful, citations accurate
+  [24/28] h046: abstained, faithful, citations accurate
+  [25/28] h047: abstained, faithful, citations accurate
+  [26/28] h048: abstained, unfaithful, citations accurate
+  [27/28] h049: abstained, faithful, citations accurate
+  [28/28] h050: abstained, n/a, citations n/a
+
+Done. Compare with: python -m experiments.compare

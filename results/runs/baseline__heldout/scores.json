@@ -1,0 +1,243 @@
+{
+  "run": "baseline__heldout",
+  "retrieval": {
+    "span_recall@1": {
+      "value": 0.355,
+      "ci95": [
+        0.242,
+        0.468
+      ],
+      "n": 62
+    },
+    "question_recall@1": {
+      "value": 0.3,
+      "ci95": [
+        0.15,
+        0.45
+      ],
+      "n": 40
+    },
+    "span_recall@3": {
+      "value": 0.548,
+      "ci95": [
+        0.419,
+        0.661
+      ],
+      "n": 62
+    },
+    "question_recall@3": {
+      "value": 0.425,
+      "ci95": [
+        0.275,
+        0.575
+      ],
+      "n": 40
+    },
+    "span_recall@5": {
+      "value": 0.694,
+      "ci95": [
+        0.581,
+        0.806
+      ],
+      "n": 62
+    },
+    "question_recall@5": {
+      "value": 0.6,
+      "ci95": [
+        0.45,
+        0.75
+      ],
+      "n": 40
+    },
+    "span_recall@all": {
+      "value": 0.694,
+      "ci95": [
+        0.581,
+        0.806
+      ],
+      "n": 62
+    },
+    "question_recall@all": {
+      "value": 0.6,
+      "ci95": [
+        0.45,
+        0.75
+      ],
+      "n": 40
+    },
+    "by_type": {
+      "comparison": {
+        "value": 0.2,
+        "ci95": [
+          0.0,
+          0.5
+        ],
+        "n": 10
+      },
+      "multi_passage": {
+        "value": 0.75,
+        "ci95": [
+          0.5,
+          1.0
+        ],
+        "n": 12
+      },
+      "single_fact": {
+        "value": 0.722,
+        "ci95": [
+          0.5,
+          0.889
+        ],
+        "n": 18
+      }
+    }
+  },
+  "judge_model": "claude-opus-5-5",
+  "rubric_version": "2",
+  "judged": 50,
+  "answers": {
+    "answerable": {
+      "correctness_score": {
+        "value": 0.7,
+        "ci95": [
+          0.562,
+          0.825
+        ],
+        "n": 40
+      },
+      "fully_correct": {
+        "value": 0.625,
+        "ci95": [
+          0.475,
+          0.775
+        ],
+        "n": 40
+      },
+      "partial": {
+        "value": 0.15,
+        "ci95": [
+          0.05,
+          0.275
+        ],
+        "n": 40
+      },
+      "incorrect": {
+        "value": 0.05,
+        "ci95": [
+          0.0,
+          0.125
+        ],
+        "n": 40
+      },
+      "false_abstention": {
+        "value": 0.175,
+        "ci95": [
+          0.075,
+          0.3
+        ],
+        "n": 40
+      },
+      "faithful": {
+        "value": 0.974,
+        "ci95": [
+          0.923,
+          1.0
+        ],
+        "n": 39
+      },
+      "citations_accurate": {
+        "value": 0.974,
+        "ci95": [
+          0.923,
+          1.0
+        ],
+        "n": 39
+      }
+    },
+    "answerable_declines": {
+      "total": 7,
+      "evidence_was_retrieved": [],
+      "evidence_not_retrieved": [
+        "h014",
+        "h015",
+        "h026",
+        "h031",
+        "h032",
+        "h037",
+        "h038"
+      ]
+    },
+    "correctness_by_retrieval": {
+      "all_evidence_retrieved": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 24
+      },
+      "evidence_missing": {
+        "value": 0.25,
+        "ci95": [
+          0.094,
+          0.406
+        ],
+        "n": 16
+      }
+    },
+    "unanswerable": {
+      "abstained": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 10
+      },
+      "answered_anyway": {
+        "value": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 10
+      }
+    },
+    "correctness_by_type": {
+      "comparison": {
+        "value": 0.4,
+        "ci95": [
+          0.15,
+          0.65
+        ],
+        "n": 10
+      },
+      "multi_passage": {
+        "value": 0.792,
+        "ci95": [
+          0.542,
+          1.0
+        ],
+        "n": 12
+      },
+      "single_fact": {
+        "value": 0.806,
+        "ci95": [
+          0.639,
+          0.944
+        ],
+        "n": 18
+      }
+    },
+    "correctness_by_author": {
+      "claude": {
+        "value": 0.7,
+        "ci95": [
+          0.562,
+          0.825
+        ],
+        "n": 40
+      }
+    }
+  }
+}

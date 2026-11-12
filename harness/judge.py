@@ -88,19 +88,23 @@ def judge_answer(
     question: dict,
     answer_text: str,
     excerpts_text: str,
-    max_tokens: int = 700,
-    attempts: int = 2,
+    max_tokens: int = 2000,
+    attempts: int = 3,
 ) -> dict:
+    """Ask the judge for a verdict. If the reply is cut off or unparseable, retry, doubling the
+    output budget when the reply hit its length limit. Grading criteria never change."""
     prompt = build_prompt(question, answer_text, excerpts_text)
-    last_error = None
+    failures = []
+    budget = max_tokens
     for _ in range(attempts):
         resp = client.messages.create(
             model=model,
-            max_tokens=max_tokens,
+            max_tokens=budget,
             system=JUDGE_SYSTEM,
             messages=[{"role": "user", "content": prompt}],
         )
         text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        stop = getattr(resp, "stop_reason", None)
         try:
             out = parse_judgment(text, len(question["key_points"]))
             out["judge_model"] = model
@@ -109,5 +113,13 @@ def judge_answer(
             out["judge_output_tokens"] = resp.usage.output_tokens
             return out
         except (ValueError, json.JSONDecodeError) as e:
-            last_error = e
-    raise RuntimeError(f"Judge output unparseable for {question['id']}: {last_error}")
+            blocks = [getattr(b, "type", "?") for b in resp.content]
+            failures.append(
+                f"stop_reason={stop}, blocks={blocks}, error={e}, text starts: {text[:200]!r}"
+            )
+            if stop == "max_tokens":
+                budget *= 2
+    detail = "\n  ".join(failures)
+    raise RuntimeError(
+        f"Judge output unparseable for {question['id']} after {attempts} tries:\n  {detail}"
+    )
