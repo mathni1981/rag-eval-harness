@@ -26,7 +26,7 @@ from data.common import ROOT, load_manifest
 from harness.excerpts import excerpts_for, format_excerpts
 from harness.judge import judge_answer
 from harness.rubric import CORRECTNESS_SCORE, RUBRIC_VERSION
-from harness.run import QUESTIONS_PATH, RUNS_DIR, load_questions
+from harness.run import RUNS_DIR, SPLITS, load_questions, split_of
 
 DEFAULT_JUDGE = "claude-opus-5-5"
 BOOTSTRAP_SAMPLES = 2000
@@ -73,15 +73,23 @@ def retrieval_at(record: dict, evidence: list[dict], k: int) -> tuple[list[bool]
 
 
 def retrieval_metrics(pairs: list[tuple[dict, dict]], ks: list[int]) -> dict:
+    """Recall at each k, plus "@all": everything the model was shown (which can exceed top_k
+    when company-aware retrieval searches several companies)."""
     out = {}
-    for k in ks:
+    k_all = max((len(rec["retrieved"]) for _, rec in pairs), default=0)
+    for k in [*ks, "all"]:
+        k_val = k_all if k == "all" else k
         span_hits, question_hits = [], []
         for q, rec in pairs:
-            spans, all_hit = retrieval_at(rec, q["evidence"], k)
+            spans, all_hit = retrieval_at(rec, q["evidence"], k_val)
             span_hits += [float(s) for s in spans]
             question_hits.append(float(all_hit))
         out[f"span_recall@{k}"] = metric(span_hits)
         out[f"question_recall@{k}"] = metric(question_hits)
+    by_type = defaultdict(list)
+    for q, rec in pairs:
+        by_type[q["type"]].append(float(retrieval_at(rec, q["evidence"], k_all)[1]))
+    out["by_type"] = {t: metric(v) for t, v in sorted(by_type.items())}
     return out
 
 
@@ -171,7 +179,12 @@ def render_report(run_name: str, scores: dict, judged: bool) -> str:
     ]
     lines += ["## Retrieval", "", "| Metric | Value |", "|---|---|"]
     for key, m in scores["retrieval"].items():
+        if key == "by_type":
+            continue
         lines.append(f"| {key} | {fmt(m)} |")
+    lines += ["", "| Question type | Recall (all shown) |", "|---|---|"]
+    for t, m in scores["retrieval"].get("by_type", {}).items():
+        lines.append(f"| {t} | {fmt(m)} |")
     if judged:
         a = scores["answers"]
         lines += [
@@ -234,7 +247,10 @@ def evaluate(
 ) -> dict:
     manifest = manifest if manifest is not None else load_manifest()
     answers = {}
-    for line in (run_dir / "answers.jsonl").read_text(encoding="utf-8").splitlines():
+    source = run_dir / "answers.jsonl"
+    if not source.exists() and not judge:
+        source = run_dir / "retrieval.jsonl"  # retrieval-only runs
+    for line in source.read_text(encoding="utf-8").splitlines():
         rec = json.loads(line)
         answers[rec["id"]] = rec
     run_meta = (
@@ -284,7 +300,7 @@ def evaluate(
             if q["id"] not in judged:
                 continue
             all_hit = (
-                retrieval_at(answers[q["id"]], q["evidence"], top_k)[1] if q["evidence"] else None
+                retrieval_at(answers[q["id"]], q["evidence"], 10**6)[1] if q["evidence"] else None
             )
             rows.append({"q": q, "j": judged[q["id"]], "retrieved_all": bool(all_hit)})
         scores["judge_model"] = judge_model
@@ -309,7 +325,8 @@ def main(argv: list[str] | None = None) -> None:
 
     load_dotenv(ROOT / ".env")
     run_dir = RUNS_DIR / args.run
-    if not (run_dir / "answers.jsonl").exists():
+    has_answers = (run_dir / "answers.jsonl").exists()
+    if not has_answers and not (args.no_judge and (run_dir / "retrieval.jsonl").exists()):
         sys.exit(f"No answers at {run_dir}/answers.jsonl; run harness.run first.")
     client = None
     if not args.no_judge:
@@ -318,7 +335,7 @@ def main(argv: list[str] | None = None) -> None:
         client = make_client()
     evaluate(
         run_dir,
-        load_questions(QUESTIONS_PATH),
+        load_questions(SPLITS[split_of(args.run)]),
         client,
         args.judge_model,
         judge=not args.no_judge,

@@ -25,24 +25,38 @@ from data.common import ROOT, load_manifest
 from harness.companies import display_name, fiscal_label
 from harness.config import RunConfig, load_config
 from harness.generate import generate, make_client
-from harness.index import SentenceTransformerEmbedder, corpus_fingerprint, load_or_build
-from harness.retrieve import BM25Retriever, DenseRetriever, overlaps
+from harness.index import corpus_fingerprint, load_or_build
+from harness.retrieve import build_pipeline, overlaps
 
 RUNS_DIR = ROOT / "results" / "runs"
 QUESTIONS_PATH = ROOT / "eval_set" / "questions.jsonl"
+# "dev" is the set used to design and tune the system; "heldout" is touched only to confirm the
+# final, pre-registered design (see docs/preregistration.md).
+SPLITS = {"dev": QUESTIONS_PATH, "heldout": ROOT / "eval_set" / "heldout.jsonl"}
+
+
+def run_dir_for(name: str, split: str = "dev") -> Path:
+    return RUNS_DIR / (name if split == "dev" else f"{name}__{split}")
+
+
+def split_of(run_name: str) -> str:
+    return run_name.rsplit("__", 1)[1] if "__" in run_name else "dev"
 
 
 def load_questions(path: Path = QUESTIONS_PATH) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
-def make_retriever(cfg: RunConfig, index, embedder=None):
-    if cfg.retrieval.method == "dense":
-        embedder = embedder or SentenceTransformerEmbedder(cfg.retrieval.embedding_model)
-        return DenseRetriever(index, embedder)
-    if cfg.retrieval.method == "bm25":
-        return BM25Retriever(index)
-    raise ValueError(f"Unknown retrieval method: {cfg.retrieval.method}")
+def make_retriever(
+    cfg: RunConfig, index, embedder=None, manifest: dict | None = None, reranker=None
+):
+    return build_pipeline(
+        cfg,
+        index,
+        manifest if manifest is not None else load_manifest(),
+        embedder=embedder,
+        reranker=reranker,
+    )
 
 
 def gold_hit(chunks: list[dict], evidence: list[dict]) -> dict:
@@ -103,6 +117,7 @@ def run(
     embedder=None,
     client=None,
     manifest: dict | None = None,
+    reranker=None,
 ) -> dict:
     manifest = manifest if manifest is not None else load_manifest()
     companies = {d: f"{display_name(d, manifest)}, {fiscal_label(d, manifest)}" for d in manifest}
@@ -118,7 +133,7 @@ def run(
             done[rec["id"]] = rec
 
     index = load_or_build(cfg, manifest, embedder=embedder)
-    retriever = make_retriever(cfg, index, embedder)
+    retriever = make_retriever(cfg, index, embedder, manifest, reranker)
     if not retrieval_only and client is None:
         client = make_client()
 
@@ -164,6 +179,7 @@ def run(
         "index_key": cfg.index_key(),
         "corpus": corpus_fingerprint(manifest),
         "git_commit": git_commit(),
+        "split": split_of(out_dir.name),
         "finished_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "retrieval_only": retrieval_only,
         "summary": summarize(records),
@@ -183,19 +199,22 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--ids", help="comma-separated question ids, e.g. q001,q019")
     parser.add_argument("--retrieval-only", action="store_true", help="no API calls")
     parser.add_argument("--overwrite", action="store_true", help="discard previous results")
+    parser.add_argument("--split", choices=sorted(SPLITS), default="dev")
     args = parser.parse_args(argv)
 
     load_dotenv(ROOT / ".env")
     cfg = load_config(args.config)
 
-    questions = load_questions()
+    questions = load_questions(SPLITS[args.split])
     if args.ids:
         wanted = set(args.ids.split(","))
         questions = [q for q in questions if q["id"] in wanted]
     if args.limit:
         questions = questions[: args.limit]
 
-    meta = run(cfg, questions, RUNS_DIR / cfg.name, args.retrieval_only, args.overwrite)
+    meta = run(
+        cfg, questions, run_dir_for(cfg.name, args.split), args.retrieval_only, args.overwrite
+    )
     print("\nSummary:")
     for key, value in meta["summary"].items():
         print(f"  {key}: {value}")

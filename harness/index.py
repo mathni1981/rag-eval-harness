@@ -103,7 +103,7 @@ def load_or_build(
     index_dir = index_dir if index_dir is not None else INDEX_DIR  # resolved at call time
     path = index_dir / cfg.index_key()
     fingerprint = corpus_fingerprint(manifest)
-    dense = cfg.retrieval.method == "dense"
+    dense = cfg.retrieval.method in ("dense", "hybrid")
 
     meta_path = path / "meta.json"
     if meta_path.exists():

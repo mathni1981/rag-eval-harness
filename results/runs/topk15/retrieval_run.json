@@ -1,0 +1,44 @@
+{
+  "config": {
+    "name": "topk15",
+    "chunking": {
+      "strategy": "fixed",
+      "size": 1500,
+      "overlap": 200
+    },
+    "retrieval": {
+      "method": "dense",
+      "embedding_model": "BAAI/bge-small-en-v1.5",
+      "top_k": 15,
+      "contextual_header": true,
+      "company_aware": false,
+      "company_k": "split",
+      "rerank_model": null,
+      "rerank_candidates": 30,
+      "rrf_k": 60
+    },
+    "generation": {
+      "model": "claude-sonnet-5-5",
+      "max_tokens": 800,
+      "temperature": null,
+      "prompt": "cited"
+    }
+  },
+  "index_key": "5d9a62d0ae85",
+  "corpus": {
+    "BEN_FY2026_10K": "4aff0d576f62521377337bac68cd855f5c34100ddb2c4330ec32f65613f7d967",
+    "BLK_FY2025_10K": "0d54fc446c313e4c1fa742223bca435217ff63d0c09d5b115c479f766e90a6a2",
+    "LNC_FY2025_10K": "cb4adb23479698e4e70fcd2074b9d5312920eb557bef0edca8b74171765f3a58",
+    "MET_FY2025_10K": "dd461f95d4c806c4b7bcc77bd6819448efe9d9af26b679f57711a5c7f69f1000",
+    "PFG_FY2025_10K": "3c906b0638c7e082bfee712243ddb86c0f43d75a023bd3674799db0fd2ab2ba8",
+    "TROW_FY2025_10K": "ff154248d15eae2477b47c0fae74dbed4c6434f629ff4557796388c36cf0f329"
+  },
+  "git_commit": "587119a",
+  "finished_at": "2026-11-11T22:54:21+00:00",
+  "retrieval_only": true,
+  "summary": {
+    "questions": 50,
+    "retrieval_all_gold_spans_covered": 26,
+    "answerable": 40
+  }
+}

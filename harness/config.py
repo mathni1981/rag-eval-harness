@@ -19,19 +19,29 @@ class ChunkingConfig:
 
 @dataclass
 class RetrievalConfig:
-    method: str = "dense"  # "dense" or "bm25"
+    method: str = "dense"  # "dense", "bm25", or "hybrid" (both, fused by reciprocal rank)
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     top_k: int = 5
     # Prepend "company, fiscal year, Item" to each chunk before embedding/BM25. Filings say
     # "we", not the company name, so without this retrieval can't tell companies apart.
     contextual_header: bool = True
+    # Detect companies named in the question. One company: search only its filing. Two or
+    # more: search each company's filing separately and merge (query decomposition).
+    company_aware: bool = False
+    # How many excerpts per company when several are named: "split" keeps the total near
+    # top_k (ceil(top_k / companies) each); "full" gives each company top_k.
+    company_k: str = "split"
+    # Rerank a larger candidate pool with a cross-encoder, then keep the top_k.
+    rerank_model: str | None = None
+    rerank_candidates: int = 30
+    rrf_k: int = 60  # reciprocal rank fusion constant for hybrid retrieval
 
 
 @dataclass
 class GenerationConfig:
     model: str = "claude-sonnet-5-5"
     max_tokens: int = 800
-    temperature: float | None = None
+    temperature: float | None = None  # some models/SDKs reject temperature; null omits it
     prompt: str = "cited"  # see harness/prompts.py
 
 
@@ -56,7 +66,11 @@ class RunConfig:
 
 
 def load_config(path: str | Path) -> RunConfig:
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return config_from_dict(yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {})
+
+
+def config_from_dict(raw: dict) -> RunConfig:
+    """Build a config, filling defaults for any field a (possibly older) file omits."""
     unknown = set(raw) - {"name", "chunking", "retrieval", "generation"}
     if unknown:
         raise ValueError(f"Unknown config keys: {sorted(unknown)}")

@@ -1,0 +1,242 @@
+{
+  "run": "company_aware",
+  "retrieval": {
+    "span_recall@1": {
+      "value": 0.323,
+      "ci95": [
+        0.21,
+        0.435
+      ],
+      "n": 62
+    },
+    "question_recall@1": {
+      "value": 0.275,
+      "ci95": [
+        0.15,
+        0.4
+      ],
+      "n": 40
+    },
+    "span_recall@3": {
+      "value": 0.548,
+      "ci95": [
+        0.419,
+        0.677
+      ],
+      "n": 62
+    },
+    "question_recall@3": {
+      "value": 0.425,
+      "ci95": [
+        0.275,
+        0.575
+      ],
+      "n": 40
+    },
+    "span_recall@5": {
+      "value": 0.613,
+      "ci95": [
+        0.5,
+        0.742
+      ],
+      "n": 62
+    },
+    "question_recall@5": {
+      "value": 0.5,
+      "ci95": [
+        0.35,
+        0.65
+      ],
+      "n": 40
+    },
+    "span_recall@all": {
+      "value": 0.613,
+      "ci95": [
+        0.5,
+        0.742
+      ],
+      "n": 62
+    },
+    "question_recall@all": {
+      "value": 0.5,
+      "ci95": [
+        0.35,
+        0.65
+      ],
+      "n": 40
+    },
+    "by_type": {
+      "comparison": {
+        "value": 0.1,
+        "ci95": [
+          0.0,
+          0.3
+        ],
+        "n": 10
+      },
+      "multi_passage": {
+        "value": 0.583,
+        "ci95": [
+          0.333,
+          0.833
+        ],
+        "n": 12
+      },
+      "single_fact": {
+        "value": 0.667,
+        "ci95": [
+          0.444,
+          0.889
+        ],
+        "n": 18
+      }
+    }
+  },
+  "judge_model": "claude-opus-5-5",
+  "rubric_version": "2",
+  "judged": 50,
+  "answers": {
+    "answerable": {
+      "correctness_score": {
+        "value": 0.725,
+        "ci95": [
+          0.6,
+          0.838
+        ],
+        "n": 40
+      },
+      "fully_correct": {
+        "value": 0.625,
+        "ci95": [
+          0.475,
+          0.775
+        ],
+        "n": 40
+      },
+      "partial": {
+        "value": 0.2,
+        "ci95": [
+          0.1,
+          0.325
+        ],
+        "n": 40
+      },
+      "incorrect": {
+        "value": 0.025,
+        "ci95": [
+          0.0,
+          0.075
+        ],
+        "n": 40
+      },
+      "false_abstention": {
+        "value": 0.15,
+        "ci95": [
+          0.05,
+          0.275
+        ],
+        "n": 40
+      },
+      "faithful": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 40
+      },
+      "citations_accurate": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 40
+      }
+    },
+    "answerable_declines": {
+      "total": 6,
+      "evidence_was_retrieved": [],
+      "evidence_not_retrieved": [
+        "q011",
+        "q013",
+        "q033",
+        "q037",
+        "q038",
+        "q040"
+      ]
+    },
+    "correctness_by_retrieval": {
+      "all_evidence_retrieved": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 20
+      },
+      "evidence_missing": {
+        "value": 0.45,
+        "ci95": [
+          0.275,
+          0.625
+        ],
+        "n": 20
+      }
+    },
+    "unanswerable": {
+      "abstained": {
+        "value": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "n": 10
+      },
+      "answered_anyway": {
+        "value": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 10
+      }
+    },
+    "correctness_by_type": {
+      "comparison": {
+        "value": 0.4,
+        "ci95": [
+          0.2,
+          0.65
+        ],
+        "n": 10
+      },
+      "multi_passage": {
+        "value": 0.833,
+        "ci95": [
+          0.708,
+          0.958
+        ],
+        "n": 12
+      },
+      "single_fact": {
+        "value": 0.833,
+        "ci95": [
+          0.667,
+          1.0
+        ],
+        "n": 18
+      }
+    },
+    "correctness_by_author": {
+      "claude": {
+        "value": 0.725,
+        "ci95": [
+          0.6,
+          0.838
+        ],
+        "n": 40
+      }
+    }
+  }
+}

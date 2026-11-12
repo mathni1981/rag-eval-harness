@@ -25,3 +25,32 @@ def display_name(doc_id: str, manifest: dict) -> str:
 def fiscal_label(doc_id: str, manifest: dict) -> str:
     end = manifest.get(doc_id, {}).get("period_end")
     return f"fiscal year ended {end}" if end else doc_id
+
+
+# How people name each company in questions. Matched case-sensitively on word boundaries, so
+# "principal executive offices" doesn't match Principal.
+ALIASES = {
+    "MET": ["MetLife"],
+    "PFG": ["Principal Financial", "Principal"],
+    "LNC": ["Lincoln National", "Lincoln Financial", "Lincoln", "LLANY"],
+    "BLK": ["BlackRock", "iShares"],
+    "TROW": ["T. Rowe Price", "T. Rowe", "T Rowe"],
+    "BEN": ["Franklin Templeton", "Franklin Resources", "Franklin"],
+}
+
+
+def detect_companies(question: str, manifest: dict) -> list[str]:
+    """Doc IDs of companies named in the question, in order of first mention."""
+    import re
+
+    found: list[tuple[int, str]] = []
+    for doc_id, entry in manifest.items():
+        ticker = entry.get("ticker") or doc_id.split("_")[0]
+        positions = [
+            m.start()
+            for alias in ALIASES.get(ticker, [])
+            for m in re.finditer(rf"(?<![\w.]){re.escape(alias)}(?!\w)", question)
+        ]
+        if positions:
+            found.append((min(positions), doc_id))
+    return [doc_id for _, doc_id in sorted(found)]

@@ -26,7 +26,7 @@ SOURCE_KINDS = {"narrative", "table", "mixed"}
 DIFFICULTIES = {"easy", "medium", "hard"}
 AUTHORS = {"human", "claude"}
 TARGET_MIX = {"single_fact": 18, "multi_passage": 12, "comparison": 10, "unanswerable": 10}
-ID_PATTERN = re.compile(r"^q\d{3,}$")
+ID_PATTERN = re.compile(r"^[a-z]\d{3,}$")  # q001 (dev), h001 (held-out)
 LEAK_NGRAM = 6
 
 
@@ -74,7 +74,7 @@ def validate(questions: list[dict], manifest: dict, report: Report) -> None:
     for q in questions:
         qid = str(q.get("id", "?"))
         if not ID_PATTERN.match(qid):
-            report.error(qid, "id must look like q001")
+            report.error(qid, "id must look like q001 or h001")
         if qid in seen_ids:
             report.error(qid, "duplicate id")
         seen_ids.add(qid)

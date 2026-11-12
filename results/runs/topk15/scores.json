@@ -1,0 +1,95 @@
+{
+  "run": "topk15",
+  "retrieval": {
+    "span_recall@1": {
+      "value": 0.323,
+      "ci95": [
+        0.21,
+        0.435
+      ],
+      "n": 62
+    },
+    "question_recall@1": {
+      "value": 0.275,
+      "ci95": [
+        0.15,
+        0.4
+      ],
+      "n": 40
+    },
+    "span_recall@3": {
+      "value": 0.532,
+      "ci95": [
+        0.403,
+        0.661
+      ],
+      "n": 62
+    },
+    "question_recall@3": {
+      "value": 0.4,
+      "ci95": [
+        0.25,
+        0.55
+      ],
+      "n": 40
+    },
+    "span_recall@15": {
+      "value": 0.726,
+      "ci95": [
+        0.613,
+        0.839
+      ],
+      "n": 62
+    },
+    "question_recall@15": {
+      "value": 0.65,
+      "ci95": [
+        0.5,
+        0.8
+      ],
+      "n": 40
+    },
+    "span_recall@all": {
+      "value": 0.726,
+      "ci95": [
+        0.613,
+        0.839
+      ],
+      "n": 62
+    },
+    "question_recall@all": {
+      "value": 0.65,
+      "ci95": [
+        0.5,
+        0.8
+      ],
+      "n": 40
+    },
+    "by_type": {
+      "comparison": {
+        "value": 0.1,
+        "ci95": [
+          0.0,
+          0.3
+        ],
+        "n": 10
+      },
+      "multi_passage": {
+        "value": 0.75,
+        "ci95": [
+          0.5,
+          1.0
+        ],
+        "n": 12
+      },
+      "single_fact": {
+        "value": 0.889,
+        "ci95": [
+          0.722,
+          1.0
+        ],
+        "n": 18
+      }
+    }
+  }
+}

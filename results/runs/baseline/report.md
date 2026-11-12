@@ -12,6 +12,14 @@ Values are means with 95% bootstrap confidence intervals over questions.
 | question_recall@3 | 40% (25–55%) · n=40 |
 | span_recall@5 | 61% (48–73%) · n=62 |
 | question_recall@5 | 50% (35–65%) · n=40 |
+| span_recall@all | 61% (48–73%) · n=62 |
+| question_recall@all | 50% (35–65%) · n=40 |
+
+| Question type | Recall (all shown) |
+|---|---|
+| comparison | 10% (0–30%) · n=10 |
+| multi_passage | 58% (33–83%) · n=12 |
+| single_fact | 67% (44–89%) · n=18 |
 
 ## Answers (judge: `claude-opus-5-5`, rubric v2)
 
